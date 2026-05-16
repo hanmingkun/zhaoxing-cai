@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>大学生理财AI搭子</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"PingFang SC","Microsoft YaHei",sans-serif;}
+    body{
+      background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%); /* 招行浅灰渐变 */
+      min-height:100vh;
+      padding-bottom:85px;
+      font-size:14px;
+      color:#333;
+    }
+    /* 顶部导航 - 招行红主色调 */
+    .header{
+      background: linear-gradient(90deg, #e00000, #c9151e); /* 招行红渐变 */
+      color:#fff;
+      padding:18px 15px;
+      text-align:center;
+      border-radius:0 0 22px 22px;
+      box-shadow:0 4px 15px rgba(224,0,0,0.25);
+      position:sticky;top:0;z-index:99;
+    }
+    .header h1{font-size:22px;font-weight:600;}
+    .header p{font-size:13px;opacity:0.9;margin-top:4px;}
+
+    .container{padding:15px;}
+    .section-title{
+      font-size:17px;font-weight:600;margin:20px 0 12px;padding-left:5px;
+      color:#222; /* 深灰文字 */
+      border-left: 3px solid #e00000; /* 招行红侧边标 */
+    }
+
+    /* 功能卡片 - 浅灰底色+招行红点缀 */
+    .card{
+      background:#fff;border-radius:18px;padding:18px;margin-bottom:14px;
+      box-shadow:0 3px 12px rgba(0,0,0,0.05); /* 更浅的阴影 */
+      border: 1px solid #f0f0f0; /* 浅灰边框 */
+    }
+    .card h3{
+      font-size:16px;color:#e00000;margin-bottom:6px; /* 招行红标题 */
+      display:flex;align-items:center;gap:6px;
+    }
+    .card p{color:#666;line-height:1.6;}
+    .card-btn{
+      display:inline-block;margin-top:10px;padding:6px 14px;
+      background:#e00000;color:#fff;border-radius:20px;font-size:13px;
+      border:none;
+      transition: background 0.2s;
+    }
+    .card-btn:hover{
+      background:#c9151e; /* 深一点的招行红 */
+    }
+
+    /* AI聊天区域 - 招行灰+红配色 */
+    .chat-wrap{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.04);}
+    .chat-top{
+      display:flex;align-items:center;justify-content:center;
+      padding:15px;border-bottom:1px solid #f0f0f0;gap:10px;
+      background:#fafafa; /* 浅灰顶部 */
+    }
+    .ai-avatar{
+      width:42px;height:42px;border-radius:50%;
+      background:#e00000;color:#fff;display:flex;
+      align-items:center;justify-content:center;font-weight:bold;
+    }
+    .chat-content{height:380px;overflow-y:auto;padding:15px;background:#fafafa;}
+    .msg{margin-bottom:14px;max-width:82%;line-height:1.55;}
+    .user-msg{
+      background:#e8e8e8;border-radius:18px 18px 4px 18px; /* 招行灰用户消息 */
+      padding:11px 14px;margin-left:auto;
+      color:#333;
+    }
+    .ai-msg{
+      background:#fff;border-radius:18px 18px 18px 4px; /* 白底+红边框 */
+      padding:11px 14px;border:1px solid #e00000;
+      color:#333;
+    }
+
+    /* 快捷场景按钮 - 招行红+浅灰 */
+    .fast-btn-group{
+      display:flex;flex-wrap:wrap;gap:8px;padding:12px 15px;
+      border-bottom:1px solid #f0f0f0;
+      background:#fafafa;
+    }
+    .fast-btn{
+      padding:5px 12px;background:#f0f0f0;color:#e00000; /* 浅灰底+招行红文字 */
+      border-radius:15px;font-size:12px;border:none;
+      transition: all 0.2s;
+    }
+    .fast-btn:hover{
+      background:#e00000;color:#fff;
+    }
+
+    /* 输入框 - 招行灰风格 */
+    .chat-input{
+      display:flex;align-items:center;padding:12px;gap:10px;
+      border-top:1px solid #f0f0f0;
+      background:#fff;
+    }
+    .chat-input input{
+      flex:1;padding:10px 14px;border-radius:25px;border:1px solid #e0e0e0; /* 浅灰边框 */
+      outline:none;font-size:14px;
+      background:#fafafa;
+    }
+    .chat-input input:focus{
+      border-color:#e00000; /* 聚焦时招行红边框 */
+    }
+    .send-btn{
+      padding:10px 18px;background:#e00000;color:#fff;
+      border-radius:25px;border:none;
+      transition: background 0.2s;
+    }
+    .send-btn:hover{
+      background:#c9151e;
+    }
+
+    /* 底部Tab栏 - 招行灰+红激活态 */
+    .tab-bar{
+      position:fixed;bottom:0;left:0;width:100%;
+      background:#fff;display:flex;justify-content:space-around;
+      padding:10px 0;box-shadow:0 -2px 10px rgba(0,0,0,0.04);
+      border-radius:20px 20px 0 0;z-index:99;
+      border-top:1px solid #f0f0f0;
+    }
+    .tab-item{text-align:center;font-size:12px;color:#888; /* 灰色未激活 */}
+    .tab-item.active{color:#e00000;font-weight:500; /* 招行红激活 */}
+
+    /* 弹窗样式 - 招行配色 */
+    .mask{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.4);display:none;z-index:1000;
+    }
+    .popup{
+      position:absolute;bottom:0;width:100%;background:#fff;
+      border-radius:22px 22px 0 0;padding:20px;
+      box-shadow:0 -4px 15px rgba(0,0,0,0.1);
+    }
+    .popup h4{text-align:center;font-size:17px;margin-bottom:15px;
+      color:#e00000; /* 招行红标题 */
+      font-weight:600;
+    }
+    .popup input,.popup select{
+      width:100%;padding:11px;border:1px solid #e0e0e0;
+      border-radius:10px;margin-bottom:12px;outline:none;
+      background:#fafafa;
+    }
+    .popup input:focus,.popup select:focus{
+      border-color:#e00000;
+    }
+    .popup-btn{
+      display:flex;gap:10px;margin-top:10px;
+    }
+    .popup-btn button{
+      flex:1;padding:11px;border-radius:10px;border:none;font-size:15px;
+      transition: background 0.2s;
+    }
+    .cancel{background:#f0f0f0;color:#666;} /* 浅灰取消 */
+    .cancel:hover{background:#e8e8e8;}
+    .confirm{background:#e00000;color:#fff;} /* 招行红确认 */
+    .confirm:hover{background:#c9151e;}
+
+    /* 页面分页 默认隐藏 */
+    .page{display:none;}
+    .page.active{display:block;}
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>大学生理财AI搭子</h1>
+  <p>懂校园·会攒钱·能陪伴·不营销</p>
+</div>
+
+<!-- 首页页面 -->
+<div class="page active" id="pageHome">
+  <div class="container">
+    <h2 class="section-title">🎯 核心功能</h2>
+    <div class="card">
+      <h3>💰 储蓄攒钱搭子</h3>
+      <p>自定义攒钱目标、自动拆分月度计划、每日打卡、应急金管理，告别月月光。</p>
+      <button class="card-btn" onclick="openSavePop()">新建攒钱目标</button>
+    </div>
+    <div class="card">
+      <h3>🛒 消费管控助手</h3>
+      <p>一句话极简记账、月度预算管控、冲动消费拦截、自动生成消费分析报表。</p>
+      <button class="card-btn" onclick="openBillPop()">立即记账</button>
+    </div>
+    <div class="card">
+      <h3>📖 理财入门导师</h3>
+      <p>基金/国债/低风险理财科普、新手入门指南、理财骗局避坑教学。</p>
+      <button class="card-btn">查看理财知识库</button>
+    </div>
+    <div class="card">
+      <h3>🤝 陪伴互动伙伴</h3>
+      <p>对话式理财答疑、攒钱进度鼓励、月度自动复盘、情绪陪伴疏导。</p>
+    </div>
+
+    <h2 class="section-title">💬 AI搭子对话</h2>
+    <div class="chat-wrap">
+      <div class="chat-top">
+        <div class="ai-avatar">AI</div>
+        <span>理财AI搭子</span>
+      </div>
+      <div class="fast-btn-group">
+        <button class="fast-btn" onclick="sendFast('攒3000元买电脑，4个月完成')">攒电脑</button>
+        <button class="fast-btn" onclick="sendFast('想买新款手机，生活费只剩1000元')">冲动消费</button>
+        <button class="fast-btn" onclick="sendFast('什么是基金？我可以买吗？')">基金咨询</button>
+        <button class="fast-btn" onclick="sendFast('年底攒5000元旅行，怎么规划？')">旅行攒钱</button>
+        <button class="fast-btn" onclick="sendFast('坚持每天存钱，好有成就感！')">打卡鼓励</button>
+        <button class="fast-btn" onclick="sendFast('这个月又超支了，钱不知花哪了')">消费复盘</button>
+      </div>
+      <div class="chat-content" id="chatBox"></div>
+      <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="输入你的理财问题...">
+        <button class="send-btn" onclick="sendMsg()">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 攒钱计划页面 -->
+<div class="page" id="pageSave">
+  <div class="container">
+    <h2 class="section-title">我的攒钱计划</h2>
+    <div class="card">
+      <h3>📌 当前进行中</h3>
+      <p>暂无攒钱目标，点击下方新建开始规划</p>
+      <button class="card-btn" onclick="openSavePop()">新建攒钱目标</button>
+    </div>
+  </div>
+</div>
+
+<!-- 记账分析页面 -->
+<div class="page" id="pageBill">
+  <div class="container">
+    <h2 class="section-title">月度消费分析</h2>
+    <div class="card">
+      <h3>📊 本月消费概览</h3>
+      <p>餐饮：35% &nbsp; 购物：40% &nbsp; 学习：15% &nbsp; 其他：10%</p>
+      <p style="margin-top:8px;">建议：减少非必要购物，提高储蓄比例</p>
+      <button class="card-btn" onclick="openBillPop()">新增一笔记账</button>
+    </div>
+  </div>
+</div>
+
+<!-- 我的页面 -->
+<div class="page" id="pageMine">
+  <div class="container">
+    <h2 class="section-title">个人中心</h2>
+    <div class="card">
+      <h3>👤 学生理财账号</h3>
+      <p>已坚持理财打卡：0天</p>
+      <p>本月储蓄完成率：0%</p>
+    </div>
+    <div class="card">
+      <h3>🔒 隐私安全</h3>
+      <p>本地数据加密，无营销广告推送</p>
+    </div>
+  </div>
+</div>
+
+<!-- 底部Tab -->
+<div class="tab-bar">
+  <div class="tab-item active" onclick="switchTab(0)">首页</div>
+  <div class="tab-item" onclick="switchTab(1)">攒钱</div>
+  <div class="tab-item" onclick="switchTab(2)">记账</div>
+  <div class="tab-item" onclick="switchTab(3)">我的</div>
+</div>
+
+<!-- 弹窗遮罩 -->
+<div class="mask" id="mask">
+  <!-- 攒钱目标弹窗 -->
+  <div class="popup" id="savePop">
+    <h4>新建攒钱目标</h4>
+    <input type="text" id="saveName" placeholder="目标名称：买电脑/旅行/考证">
+    <input type="number" id="saveMoney" placeholder="目标总金额">
+    <input type="number" id="saveMonth" placeholder="计划几个月完成">
+    <div class="popup-btn">
+      <button class="cancel" onclick="closePop()">取消</button>
+      <button class="confirm" onclick="confirmSave()">确认创建</button>
+    </div>
+  </div>
+  <!-- 记账弹窗 -->
+  <div class="popup" id="billPop" style="display:none;">
+    <h4>一键记账</h4>
+    <select id="billType">
+      <option>餐饮美食</option>
+      <option>购物消费</option>
+      <option>学习用品</option>
+      <option>生活杂物</option>
+    </select>
+    <input type="number" id="billMoney" placeholder="消费金额">
+    <div class="popup-btn">
+      <button class="cancel" onclick="closePop()">取消</button>
+      <button class="confirm" onclick="confirmBill()">保存记账</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab页面切换
+const pages = ['pageHome','pageSave','pageBill','pageMine'];
+const tabs = document.querySelectorAll('.tab-item');
+function switchTab(idx){
+  pages.forEach((id,i)=>{
+    document.getElementById(id).classList.toggle('active',i===idx);
+  });
+  tabs.forEach((tab,i)=>{
+    tab.classList.toggle('active',i===idx);
+  });
+}
+
+// AI知识库自动回复库
+const aiReply = {
+  "攒3000元买电脑，4个月完成":"帮你拆分：每月需存750元，每天约25元，已为你生成每日打卡计划，坚持就能达成目标！",
+  "想买新款手机，生活费只剩1000元":"目前生活费余额不足，购入会影响日常三餐和必要开支，建议先加入愿望清单，冷静一天再决定哦～",
+  "什么是基金？我可以买吗？":"基金是集合多人资金由专业机构统一投资的资金池，大学生新手建议从低风险指数基金小额尝试，切记不跟风、不重仓。",
+  "年底攒5000元旅行，怎么规划？":"按8个月规划：每月存625元，每周约存156元，我可以帮你建立专属旅行攒钱计划并每日提醒。",
+  "坚持每天存钱，好有成就感！":"太棒啦！为你颁发「月度存钱达人」勋章，好习惯会让你越来越有钱，离财务自由又近一步✨",
+  "这个月又超支了，钱不知花哪了":"帮你分析：本月娱乐和非必要购物占比偏高，建议下月设置固定娱乐预算，克制冲动消费，合理分配生活费。"
+};
+
+// 发送快捷话术
+function sendFast(text){
+  document.getElementById('chatInput').value = text;
+  sendMsg();
+}
+
+// 发送消息
+function sendMsg(){
+  let input = document.getElementById('chatInput');
+  let val = input.value.trim();
+  if(!val) return;
+  let chatBox = document.getElementById('chatBox');
+  // 用户消息
+  chatBox.innerHTML += `<div class="msg user-msg">${val}</div>`;
+  input.value = '';
+  // AI回复
+  setTimeout(()=>{
+    let reply = aiReply[val] || "我是你的大学生理财AI搭子，可以帮你做攒钱规划、记账分析、理财科普、克制冲动消费，有什么都可以问我～";
+    chatBox.innerHTML += `<div class="msg ai-msg">${reply}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  },600);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// 攒钱弹窗
+function openSavePop(){
+  document.getElementById('mask').style.display = 'block';
+  document.getElementById('savePop').style.display = 'block';
+  document.getElementById('billPop').style.display = 'none';
+}
+// 记账弹窗
+function openBillPop(){
+  document.getElementById('mask').style.display = 'block';
+  document.getElementById('billPop').style.display = 'block';
+  document.getElementById('savePop').style.display = 'none';
+}
+// 关闭弹窗
+function closePop(){
+  document.getElementById('mask').style.display = 'none';
+}
+
+// 确认创建攒钱目标
+function confirmSave(){
+  let name = document.getElementById('saveName').value;
+  let money = Number(document.getElementById('saveMoney').value);
+  let month = Number(document.getElementById('saveMonth').value);
+  if(!name || !money || !month){
+    alert('请填写完整目标信息');
+    return;
+  }
+  let monthAvg = (money / month).toFixed(0);
+  alert(`创建成功！\n目标：${name}\n总金额：${money}元\n${month}个月完成，每月需存${monthAvg}元`);
+  closePop();
+}
+
+// 确认记账
+function confirmBill(){
+  let type = document.getElementById('billType').value;
+  let money = document.getElementById('billMoney').value;
+  if(!money){
+    alert('请输入消费金额');
+    return;
+  }
+  alert(`记账成功！\n类型：${type}\n金额：${money}元\n已计入月度消费统计`);
+  closePop();
+}
+
+// 回车发送
+document.getElementById('chatInput').addEventListener('keydown',function(e){
+  if(e.key === 'Enter') sendMsg();
+});
+</script>
+</body>
+</html>
